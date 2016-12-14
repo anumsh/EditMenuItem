@@ -11,13 +11,13 @@ Base.metadata.bind = engine
 DBSession = sessionmaker(bind=engine)
 session = DBSession()
 
-# routing for viewing the restauarnt menu ( /restaurant/2 )
 @app.route('/')
-@app.route('/restaurants/<int:restaurant_id>/')
+@app.route('/restaurant/<int:restaurant_id>/')
 def restaurantMenu(restaurant_id):
     restaurant = session.query(Restaurant).filter_by(id=restaurant_id).one()
+    print restaurant.id
+    print restaurant.name
     items = session.query(MenuItem).filter_by(restaurant_id=restaurant.id)
-    # return the render_template to view the items.
     return render_template('menu.html', restaurant=restaurant, items=items)
 
 # routing for new menu item in restaurant.
@@ -33,9 +33,12 @@ def newMenuItem(restaurant_id):
         return render_template('newmenuitem.html', restaurant_id=restaurant_id)
 
 
-@app.route('/restaurants/<int:restaurant_id>/<int:MenuID>/edit', methods = ['GET', 'POST'])
-def editMenuItem(restaurant_id, MenuID):
-    editedItem = session.query(MenuItem).filter_by(id = MenuID).one()
+@app.route('/restaurant/<int:restaurant_id>/<int:menu_id>/edit', methods = ['GET', 'POST'])
+def editMenuItem(restaurant_id, menu_id):
+    editedItem = session.query(MenuItem).filter_by(id = menu_id).one()
+    print editedItem.name
+    print editedItem.id
+    print restaurant_id
     if request.method == 'POST':
         if request.form['name']:
             editedItem.name = request.form['name']
@@ -43,8 +46,8 @@ def editMenuItem(restaurant_id, MenuID):
         session.commit()
         return redirect(url_for('restaurantMenu', restaurant_id = restaurant_id))
     else:
-        #USE THE RENDER_TEMPLATE FUNCTION BELOW TO SEE THE VARIABLES YOU SHOULD USE IN YOUR EDITMENUITEM TEMPLATE
-        return render_template('editmenuitem.html', restaurant_id = restaurant_id, MenuID = MenuID, item = editedItem)
+        return render_template('editmenuitem.html', restaurant_id = restaurant_id, menu_id = menu_id, item = editedItem)
+
 
 @app.route('/restaurant/<int:restaurant_id>/<int:menu_id>/delete/')
 def deleteMenuItem(restaurant_id, menu_id):
